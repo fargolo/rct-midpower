@@ -1,0 +1,18 @@
+# Pseudocode
+DEFINE power_prob = 0
+FOR trat_n_add IN n_rand_followed 
+  DEFINE INT cont_n_add = n_rand_followed - trat_n_add 
+  FOR trat_succ_add IN trat_n_add
+    FOR cont_succ_add IN cont_n_add
+      DEFINE INT a = trat_sucpr + trat_succ_add
+             INT b = cont_sucpr + cont_succ_add
+             INT c = trat_npr + trat_n_add
+             INT d = cont_npr + cont_n_add
+      DEFINE OBS_MARG_ITER = -(a/c - b/d - 1.64*SQRT((a*(c-a))/((c)^3) + (b*(d-b))/(d)^3))
+      IF margobs_iter < margin
+        DEFINE FLOAT prob_one = PROB_BINOM(trat_n_add, n_rand_followed, rand_ratio)
+               FLOAT prob_two = PROB_BINOM(trat_succ_add, trat_n_add, p_trat)
+               FLOAT prob_three = PROB_BINOM(cont_succ_add, cont_n_add, p_cont)
+               FLOAT prob_final = prob_one*prob_two*prob_three
+               FLOAT power_prob = power_prob + prob_final
+RETURN power_prob
