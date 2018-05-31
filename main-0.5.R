@@ -2,8 +2,8 @@
 # title      : conditional_power
 # description: Procedure for calculating statistical power in ongoing
 #              clinical trials with dichotomous outcomes
-# date       : April - 10, 2018
-# version    : 0.4
+# date       : May - 31, 2018
+# version    : 0.5
 # r-version  : 3.4.1
 # authors    : Guilherme M. Magnavita, Felipe C. Argolo
 # usage      : Specify parameters of (1) non-inferiority margin,
@@ -31,7 +31,7 @@ joint_binom <- function(trat_succ_add,cont_succ_add,
                         trat_n_add,cont_n_add,
                         rand_ratio,n_rand_followed,
                         p_trat,p_cont){
-  # Probability of randomizingpatients to treatment
+  # Probability of randomizing patients to one group (treatment)
   prob_one <- dbinom(trat_n_add, n_rand_followed, rand_ratio)
   # Probability of successes in treatment
   prob_two <- dbinom(trat_succ_add, trat_n_add, p_trat)
@@ -53,11 +53,12 @@ conditional_power <- function(margin, trat_npr, trat_sucpr,
   b <- cont_sucpr:(cont_sucpr+n_rand_followed)
   tot_rand <- trat_npr+cont_npr+n_rand_followed
   
-  scenario_sims <- data.frame(expand.grid(a,b,c,d)) %>% setNames(c("a","b","c","d")) %>%
+  scenario_sims <- data.frame(expand.grid(a,b,c,d)) %>% 
+    setNames(c("a","b","c","d")) %>%
     mutate(marg_obs = margobs(a,b,c,d)) %>% # calculate margins
     subset(marg_obs < margin & c + d == tot_rand) %>% # non-inf scenarios
-    mutate(trat_s=a - trat_sucpr, cont_s=b - cont_sucpr,
-           trat_n=c - trat_npr, cont_n=d - cont_npr) %>% # retrieving args for joint binom 
+    mutate(trat_s=a - trat_sucpr, cont_s=b - cont_sucpr, # retrieving args for joint binom
+           trat_n=c - trat_npr, cont_n=d - cont_npr) %>%  
     mutate(p=joint_binom(trat_s, cont_s, trat_n, cont_n, #joint probability
                          rand_ratio,n_rand_followed,p_trat,p_cont))
   sum(scenario_sims$p)} 
