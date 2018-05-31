@@ -22,7 +22,6 @@
 #                  rand_ratio=0.5)
 
 require(magrittr)
-require(purrr)
 require(dplyr)
 
 margobs <- function(a,b,c,d){
