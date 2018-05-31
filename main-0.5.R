@@ -47,14 +47,18 @@ conditional_power <- function(margin, trat_npr, trat_sucpr,
                               p_trat=trat_sucpr/trat_npr, 
                               p_cont=cont_sucpr/cont_npr, attrition_rate=0){
   n_rand_followed <- floor(n_to_rand*(1-attrition_rate))
+  
   c <- trat_npr:(trat_npr+n_rand_followed)
   d <- cont_npr:(cont_npr+n_rand_followed)
-  a <- trat_sucpr:max(trat_sucpr+n_rand_followed)
-  b <- cont_sucpr:max(cont_sucpr+n_rand_followed)
+  a <- trat_sucpr:(trat_sucpr+n_rand_followed)
+  b <- cont_sucpr:(cont_sucpr+n_rand_followed)
   tot_rand <- trat_npr+cont_npr+n_rand_followed
-  data.frame(expand.grid(a,b,c,d)) %>%
-    mutate(marg_obs = margobs(.[[1]],.[[2]],.[[3]],.[[4]])) %>%
-    subset(marg_obs < margin & .[[3]]+.[[4]] == tot_rand &
-             .[[1]] < .[[3]] & .[[2]] < .[[4]]) %>%
-    mutate(p=joint_binom(.[[1]],.[[2]],.[[3]],.[[4]],rand_ratio,
-                         n_rand_followed,p_trat,p_cont))} 
+  
+  scenario_sims <- data.frame(expand.grid(a,b,c,d)) %>% setNames(c("a","b","c","d")) %>%
+    mutate(marg_obs = margobs(a,b,c,d)) %>% # calculate margins
+    subset(marg_obs < margin & c + d == tot_rand) %>% # non-inf scenarios
+    mutate(trat_s=a - trat_sucpr, cont_s=b - cont_sucpr,
+           trat_n=c - trat_npr, cont_n=d - cont_npr) %>% # retrieving args for joint binom 
+    mutate(p=joint_binom(trat_s, cont_s, trat_n, cont_n, #joint probability
+                         rand_ratio,n_rand_followed,p_trat,p_cont))
+  sum(scenario_sims$p)} 
